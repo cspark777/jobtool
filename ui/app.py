@@ -62,23 +62,17 @@ def extract():
             attrs = PyramidPool.query.with_entities(PyramidPool.sku_num, PyramidPool.attr_nm, PyramidPool.attr_val).distinct().filter(PyramidPool.web_cls_num==first_web_class[0]).all()
             
         return render_template('extract.html', web_classes=web_classes, attrs=attrs)
-
     else:
-        web_class = None
-        if request.method == 'POST':
-            #TODO: 1
-            web_class = request.form['web_class']
-            attr = request.form['attr']
-            cur_time = datetime.datetime.today()
+        web_class = request.form['web_class']
+        attr = request.form['attr']
 
-        if not web_class:
-            flash('Web Class is required!')
-        else:
-            job_record = _create_job_record(web_class, attr, cur_time)
-            _add_to_database(job_record)
-            return redirect(url_for('index'))
+        attrs = PyramidPool.query.with_entities(PyramidPool.sku_num, PyramidPool.attr_nm, PyramidPool.attr_val).distinct().filter(PyramidPool.sku_num==attr).all()
 
-        return render_template('extract.html')
+        cur_time = datetime.datetime.today()
+
+        job_record = _create_job_record(web_class, attrs[0].attr_nm + " : " + attrs[0].attr_val, cur_time)
+        _add_to_database(job_record)
+        return redirect(url_for('index'))
 
 @app.route('/extract-results', methods=('GET', 'POST'))
 def retrieve_results():
