@@ -60,13 +60,11 @@ class Review(db.Model):
         return f'Review("{self.id}")'
 
 class PyramidPool(db.Model):
-    __bind_key__  = 'db_match_pool'
-    __table_args__ = {"schema": "MERCHBI.NPD"}
-    __tablename__ = 'ATTR_PYR'
+    __tablename__ = 'pyr'
     
     sku_num = db.Column('SKU_NUM', db.String(50), primary_key=True)
     attr_nm  = db.Column('ATTR_NM', db.Text, primary_key=True)
     web_cls_num  = db.Column('WEB_CLASS_NUM', db.Integer)
-    web_cls_nm = db.Column('WEB_CLASS_NM', db.String(255))
+    web_cls_nm = db.Column('WEB_CLASS', db.String(255))
     item_desc = db.Column('ITEM_DESC', db.Text)
     attr_val = db.Column('ATTR_VAL', db.Text)

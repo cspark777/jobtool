@@ -13,7 +13,7 @@ from ui.database.utils import _add_to_database, _create_job_record
 from ui.database.db_schemas import Job, Result, PyramidPool
 from ui import create_app
 
-
+import json
 
 """
 1. In extract() function, after 'if request.method ',
@@ -38,25 +38,50 @@ def index():
     print(Job.query.all())
     return render_template('index.html', jobs=Job.query.all())
 
+@app.route('/get_attrs', methods=["GET"])
+def get_attrs():
+    web_class = request.args.get('web_class')
+    attrs = PyramidPool.query.with_entities(PyramidPool.sku_num, PyramidPool.attr_nm, PyramidPool.attr_val).distinct().filter(PyramidPool.web_cls_num==web_class).all()
+
+    res = []
+    for attr in attrs:
+        data = {"sku": attr.sku_num, "attr_name": attr.attr_nm + " : " + attr.attr_val}
+        res.append(data)
+
+    res_json = json.dumps(res)
+    return res_json
+
 @app.route('/extract', methods=('GET', 'POST'))
 def extract():
-    web_class = None
-    if request.method == 'POST':
-        #TODO: 1
-        web_class = request.form['web_class']
-        attr = request.form['attr']
-        cur_time = datetime.datetime.today()
+    if request.method == 'GET':
+        web_classes = PyramidPool.query.with_entities(PyramidPool.web_cls_num, PyramidPool.web_cls_nm).distinct().all()
 
-    if not web_class:
-        flash('Web Class is required!')
+        attrs = []
+        if len(web_classes) > 0:
+            first_web_class = web_classes[0]
+            attrs = PyramidPool.query.with_entities(PyramidPool.sku_num, PyramidPool.attr_nm, PyramidPool.attr_val).distinct().filter(PyramidPool.web_cls_num==first_web_class[0]).all()
+            
+        return render_template('extract.html', web_classes=web_classes, attrs=attrs)
+
     else:
-        job_record = _create_job_record(web_class, attr, cur_time)
-        _add_to_database(job_record)
-        return redirect(url_for('index'))
-    return render_template('extract.html')
+        web_class = None
+        if request.method == 'POST':
+            #TODO: 1
+            web_class = request.form['web_class']
+            attr = request.form['attr']
+            cur_time = datetime.datetime.today()
+
+        if not web_class:
+            flash('Web Class is required!')
+        else:
+            job_record = _create_job_record(web_class, attr, cur_time)
+            _add_to_database(job_record)
+            return redirect(url_for('index'))
+
+        return render_template('extract.html')
 
 @app.route('/extract-results', methods=('GET', 'POST'))
-def retrieve_resutls():
+def retrieve_results():
     web_class = None
     if request.method == 'POST':
         web_class = request.form['web_class']
