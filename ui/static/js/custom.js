@@ -15,7 +15,7 @@
             $('#attr').empty();
 
             for(var i=0; i<msg_obj.length; i++){
-                $('#attr').append("<option value='" + msg_obj[i]["sku"] + "'>" + msg_obj[i]["attr_name"] + "</option>");
+                $('#attr').append("<option value='" + msg_obj[i]["attr_name"] + "'>" + msg_obj[i]["attr_name"] + "</option>");
             }
             //Metronic.unblockUI();
         })
