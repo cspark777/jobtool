@@ -51,6 +51,17 @@ def get_attrs():
     res_json = json.dumps(res)
     return res_json
 
+@app.route('/job_list', methods=["GET"])
+def job_list():
+    jobs = Job.query.order_by(Job.id.desc()).all()
+    
+    result = []
+    for job in jobs:
+        job.date_created = job.date_created.strftime("%Y-%m-%d %H:%M:%S")
+
+        result.append(job)
+    return render_template('job_list.html', jobs=result)
+
 @app.route('/extract', methods=('GET', 'POST'))
 def extract():
     if request.method == 'GET':
@@ -66,31 +77,41 @@ def extract():
         web_class = request.form['web_class']
         attr_nm = request.form['attr_nm']
 
-        
         attrs = PyramidPool.query.with_entities(PyramidPool.attr_nm).distinct().filter(PyramidPool.web_cls_num==web_class).filter(PyramidPool.attr_nm==attr_nm).all()
 
         cur_time = datetime.datetime.today()
 
         job_record = _create_job_record(web_class, attrs[0].attr_nm, cur_time)
         _add_to_database(job_record)
-        return redirect(url_for('index'))
+
+        return redirect(url_for('job_list'))
 
 @app.route('/extract-results', methods=('GET', 'POST'))
 def retrieve_results():
-    web_class = None
-    if request.method == 'POST':
-        web_class = request.form['web_class']
-        attr = request.form['attr']
-        cur_time = datetime.datetime.today()
+    if request.method == 'GET':  
+        web_classes = PyramidPool.query.with_entities(PyramidPool.web_cls_num, PyramidPool.web_cls_nm).distinct().all()
 
-    if not web_class:
-        flash('Web Class is required!')
+        attrs = []
+        if len(web_classes) > 0:
+            first_web_class = web_classes[0]
+            attrs = PyramidPool.query.with_entities(PyramidPool.sku_num, PyramidPool.attr_nm, PyramidPool.attr_val).distinct().filter(PyramidPool.web_cls_num==first_web_class[0]).all()  
+
+        download_url = ""
+        return render_template('retrieve_extracts.html', web_classes=web_classes, attrs=attrs, download_url=download_url)
+
     else:
-        res = Result.query.filter_by(web_cls_num=web_class, attr_nm=attr)#1. from db.resutls get the latest extraction results
-        #TODO:2
+        
+        web_class = request.form['web_class']
+        attr_nm = request.form['attr_nm']
+
+        if not web_class:
+            flash('Web Class is required!')
+        else:
+            res = Result.query.filter_by(web_cls_num=web_class, attr_nm=attr)#1. from db.resutls get the latest extraction results
+            #TODO:2
         
         return redirect(url_for('index'))
-    return render_template('extract.html')   
+    return render_template('retrieve_extracts.html')   
 
 
 @app.route('/submit-review', methods=('GET', 'POST'))

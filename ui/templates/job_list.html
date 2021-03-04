@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Submit Review  {% endblock %}</h1>
+
+<table id="job_table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Web Class</th>
+      <th>Attribute</th>
+      <th>CreateDate</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for job in jobs %} 
+    <tr>
+      <td>{{ job.id }}</td>
+      <td>{{ job.web_cls_num }}</td>
+      <td>{{ job.attr_nm }}</td>
+      <td>{{ job.date_created }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

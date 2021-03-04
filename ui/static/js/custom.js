@@ -2,6 +2,10 @@
     "use strict"; // Start of use strict
 
     $('.select-2').select2();
+    
+    var maintable = $('#job_table').DataTable({        
+        "order": [[ 0, "desc" ]]
+    });
 
     $("#web_class").on("change", function(e){
         var selected_webclass = $(this).val();
