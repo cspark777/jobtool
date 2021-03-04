@@ -19,16 +19,19 @@ class Job(db.Model):
     
 class Result(db.Model):
     __tablename__ = 'extract_result'
-
-    id = db.Column('Result_ID', db.Integer, primary_key=True)
-    date_created = db.Column('Creation_Date', db.DateTime, nullable=False)
-    web_cls_num  = db.Column('WEB_CLASS_NUM', db.Integer)
-    attr_nm  = db.Column('ATTR_NM', db.Text)
+    id = db.Column('id', db.Integer, primary_key=True)
+    extract_id = db.Column('Extract_ID', db.Integer, nullable=False)
+    sku_num = db.Column('SKU_NUM', db.Text, nullable=False)
+    item_desc = db.Column('ITEM_DESC', db.Text)
+    attr_nm = db.Column('ATTR_NM', db.Text)
     attr_val = db.Column('ATTR_VAL', db.Text)
-    confidence = db.Column('Confidence', db.Float)
+    pred_attr_val = db.Column('PRED_ATTR_VAL', db.Text)
+    confidence = db.Column('Confidence', db.Float)    
+    date_created = db.Column('Creation_Date', db.DateTime, nullable=False)
     model_id = db.Column('Model_ID', db.Integer, db.ForeignKey('trained_model.Model_ID'), nullable=False)
-    job_id = db.Column('Job_ID', db.Integer, db.ForeignKey('extract_job.Job_ID'), nullable=False)
-    
+    job_id = db.Column('Job_ID', db.Integer, db.ForeignKey('extract_job.Job_ID'), nullable=False)    
+    web_cls_num  = db.Column('WEB_CLASS_NUM', db.Integer, db.ForeignKey('PyramidPool.web_cls_num'))
+        
     def __repr__(self):
         return f'Result("{self.id}")'
 
@@ -49,7 +52,8 @@ class TrainedModel(db.Model):
 class Review(db.Model):
     __tablename__ = 'match_review'
 
-    id = db.Column('Review_ID', db.Integer, primary_key=True)
+    id = db.Column('id', db.Integer, primary_key=True)
+    Review = db.Column('Review_ID', db.Integer)
     date_created = db.Column('Creation_Date', db.DateTime, nullable=False)
     web_cls_num  = db.Column('WEB_CLASS_NUM', db.Integer)
     attr_nm  = db.Column('ATTR_NM', db.Text)

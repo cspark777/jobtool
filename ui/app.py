@@ -70,7 +70,7 @@ def extract():
         attrs = []
         if len(web_classes) > 0:
             first_web_class = web_classes[0]
-            attrs = PyramidPool.query.with_entities(PyramidPool.sku_num, PyramidPool.attr_nm, PyramidPool.attr_val).distinct().filter(PyramidPool.web_cls_num==first_web_class[0]).all()
+            attrs = PyramidPool.query.with_entities(PyramidPool.attr_nm).distinct().filter(PyramidPool.web_cls_num==first_web_class[0]).all()
             
         return render_template('extract.html', web_classes=web_classes, attrs=attrs)
     else:
@@ -86,32 +86,48 @@ def extract():
 
         return redirect(url_for('job_list'))
 
+@app.route('/get_result_attrs', methods=["GET"])
+def get_result_attrs():
+    web_class = request.args.get('web_class')
+    attrs = Result.query.with_entities(Result.attr_nm).distinct().filter(Result.web_cls_num==web_class).all()
+
+    res = []
+    for attr in attrs:
+        data = {"attr_name": attr.attr_nm}
+        res.append(data)
+
+    res_json = json.dumps(res)
+    return res_json
+
+
 @app.route('/extract-results', methods=('GET', 'POST'))
 def retrieve_results():
-    if request.method == 'GET':  
-        web_classes = PyramidPool.query.with_entities(PyramidPool.web_cls_num, PyramidPool.web_cls_nm).distinct().all()
+    
+    web_classes = Result.query.with_entities(Result.web_cls_num, PyramidPool.web_cls_nm).join(PyramidPool, PyramidPool.web_cls_num==Result.web_cls_num).distinct().all()
 
-        attrs = []
-        if len(web_classes) > 0:
-            first_web_class = web_classes[0]
-            attrs = PyramidPool.query.with_entities(PyramidPool.sku_num, PyramidPool.attr_nm, PyramidPool.attr_val).distinct().filter(PyramidPool.web_cls_num==first_web_class[0]).all()  
+    attrs = []
+    if len(web_classes) > 0:
+        first_web_class = web_classes[0]
+        attrs = Result.query.with_entities(Result.attr_nm).distinct().filter(Result.web_cls_num==first_web_class[0]).all()  
+
+    if request.method == 'GET':  
 
         download_url = ""
-        return render_template('retrieve_extracts.html', web_classes=web_classes, attrs=attrs, download_url=download_url)
+        results = None
+        return render_template('result_list.html', web_classes=web_classes, attrs=attrs, download_url=download_url, results=results)
 
-    else:
-        
+    else:        
         web_class = request.form['web_class']
         attr_nm = request.form['attr_nm']
 
-        if not web_class:
-            flash('Web Class is required!')
-        else:
-            res = Result.query.filter_by(web_cls_num=web_class, attr_nm=attr)#1. from db.resutls get the latest extraction results
-            #TODO:2
-        
-        return redirect(url_for('index'))
-    return render_template('retrieve_extracts.html')   
+        results = Result.query.filter_by(web_cls_num=web_class, attr_nm=attr_nm)
+        response_results = []
+        for r in results:
+            r.date_created = r.date_created.strftime("%Y-%m-%d %H:%M:%S")
+            response_results.append(r)
+
+        download_url = "/export?class={}&attr_nm={}".format(web_class, attr_nm)
+        return render_template('result_list.html', web_classes=web_classes, attrs=attrs, download_url=download_url, results=response_results)   
 
 
 @app.route('/submit-review', methods=('GET', 'POST'))
@@ -133,31 +149,28 @@ def submit_review():
         return redirect(url_for('index'))
     return render_template('extract.html')
 
-#select web class 
-def web_cls_select():
-    ''' Matching Tool -- Web Class Filter '''
-    search = request.args.get('q')
-    results = PyramidPool.query.with_entities(PyramidPool.web_cls_num, PyramidPool.web_cls_nm) \
-                             .distinct() \
-                             .filter(or_(PyramidPool.web_cls_nm.like(str(search)+"%"), PyramidPool.web_cls_num.like(str(search)+"%"))) \
-                             .all()
-    results_dict = dict()
-    results_dict["results"] = [{"id": x[0], "text": "{0}: {1}".format(*x)} for x in sorted(results)]
-    return jsonify(results_dict)
-
-@app.route("/export", methods=["GET", "POST"])
+@app.route("/export", methods=["GET"])
 def export():
-    results_filename='testing_export'
-    ''' Download Match Results to CSV File without ATP '''
-    def retrieve_data():
-        for result in ['khuiy','fuyuu','fhfh']:
-            yield (
-                str(result[:2]),
-                str(result[:3]),
-                str(result[:4])
-            )
+
+    web_class = request.args.get('class')
+    attr_nm = request.args.get('attr_nm')
+
+    results = Result.query.filter_by(web_cls_num=web_class, attr_nm=attr_nm)
+
+    csv = "Extract_ID,SKU_NUM,ITEM_DESC,ATTR_NM,ATTR_VAL,PRED_ATTR_VAL,Confidence,Creation_Date,Model_ID,Job_ID,WEB_CLASS_NUM\n"
+
+    for res in results:
+        csv = csv + '{},{},\"{}\",\"{}\",\"{}\",\"{}\",{},{},{},{},{}\n'.format(res.extract_id, res.sku_num, res.item_desc, res.attr_nm, res.attr_val, res.pred_attr_val, res.confidence, res.date_created, res.model_id, res.job_id, res.web_cls_num)
+
+    return Response(
+        csv,
+        mimetype="text/csv",
+        headers={"Content-disposition":
+                 "attachment; filename=results.csv"})
+
 
     # streaming CSV content -- to send over large data
+    '''
     def generate(rows):
         data = StringIO()       # In-Memory File
         w    = csv.writer(data)
@@ -179,5 +192,6 @@ def export():
     # add a filename
     response.headers.set("Content-Disposition", "attachment", filename=f"{results_filename}.csv")
     return render_template('export.html', response = response)
+    '''
 
 app.run(debug = False, host="0.0.0.0", port="8080", use_reloader=False,)

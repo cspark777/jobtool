@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-8">
+    <h1>{% block title %} Retrieve Extracts  {% endblock %}</h1>
+  </div>
+  <div class="col-md-4">
+    <a href="{{ download_url }}" style="float: right;"> 
+          {% if download_url != "": %}
+          Download CSV
+          {% endif %}
+    </a>
+  </div>
+</div>
+
+{% if results == None: %}
+<form method="post">
+
+    <div class="form-group">
+        <label for="Web Class">Web Class</label>
+
+        <select id="result_web_class" name="web_class" class="select-2 form-control form-select form-select-lg mb-3">
+          {% for web_c in web_classes %} 
+            <option value="{{ web_c.web_cls_num }}"> {{ web_c.web_cls_num }} : {{ web_c.web_cls_nm }} </option>
+          {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="content">Attribute</label>
+        <select id="result_attr" name="attr_nm" class="select-2 form-control form-select form-select-lg mb-3">
+          {% for attr in attrs %} 
+            <option value="{{ attr.attr_nm }}"> {{ attr.attr_nm }}</option>
+          {% endfor %}
+        </select>
+    </div>
+    <div class="form-group" style="margin-top: 1.5rem;">
+        <button type="submit" class="btn btn-primary">Submit</button>        
+    </div>
+
+{% else: %}
+<div class="row">
+  <div class="col-md-12">
+    <table id="result_table">
+      <thead>
+        <tr>
+          <th>Extract_ID</th>
+          <th>SKU_NUM</th>
+          <!--<th>Item_Desc</th>-->
+          <th>ATTR_NM</th>
+          <th>ATTR_VAL</th>
+          <th>PRED_ATTR_VAL</th>
+          <th>Confidence</th>
+          <th>Creation Date</th>
+          <th>Model_Id</th>
+          <th>Job_Id</th>
+          <th>class</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for res in results %} 
+        <tr>
+          <td>{{ res.extract_id }}</td>
+          <td>{{ res.sku_num }}</td>
+          <!--<td>{{ res.item_desc }}</td>-->
+          <td>{{ res.attr_nm }}</td>
+          <td>{{ res.attr_val }}</td>
+          <td>{{ res.pred_attr_val }}</td>
+          <td>{{ res.confidence }}</td>
+          <td>{{ res.date_created }}</td>
+          <td>{{ res.model_id }}</td>
+          <td>{{ res.job_id }}</td>
+          <td>{{ res.web_cls_num }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+</form>
+{% endblock %}
