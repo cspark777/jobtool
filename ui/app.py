@@ -41,11 +41,11 @@ def index():
 @app.route('/get_attrs', methods=["GET"])
 def get_attrs():
     web_class = request.args.get('web_class')
-    attrs = PyramidPool.query.with_entities(PyramidPool.sku_num, PyramidPool.attr_nm, PyramidPool.attr_val).distinct().filter(PyramidPool.web_cls_num==web_class).all()
+    attrs = PyramidPool.query.with_entities(PyramidPool.attr_nm).distinct().filter(PyramidPool.web_cls_num==web_class).all()
 
     res = []
     for attr in attrs:
-        data = {"sku": attr.sku_num, "attr_name": attr.attr_nm + " : " + attr.attr_val}
+        data = {"attr_name": attr.attr_nm}
         res.append(data)
 
     res_json = json.dumps(res)
@@ -64,13 +64,14 @@ def extract():
         return render_template('extract.html', web_classes=web_classes, attrs=attrs)
     else:
         web_class = request.form['web_class']
-        attr = request.form['attr']
+        attr_nm = request.form['attr_nm']
 
-        attrs = PyramidPool.query.with_entities(PyramidPool.sku_num, PyramidPool.attr_nm, PyramidPool.attr_val).distinct().filter(PyramidPool.sku_num==attr).all()
+        
+        attrs = PyramidPool.query.with_entities(PyramidPool.attr_nm).distinct().filter(PyramidPool.web_cls_num==web_class).filter(PyramidPool.attr_nm==attr_nm).all()
 
         cur_time = datetime.datetime.today()
 
-        job_record = _create_job_record(web_class, attrs[0].attr_nm + " : " + attrs[0].attr_val, cur_time)
+        job_record = _create_job_record(web_class, attrs[0].attr_nm, cur_time)
         _add_to_database(job_record)
         return redirect(url_for('index'))
 

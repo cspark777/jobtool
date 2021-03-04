@@ -1,6 +1,8 @@
 (function($) {
     "use strict"; // Start of use strict
 
+    $('.select-2').select2();
+
     $("#web_class").on("change", function(e){
         var selected_webclass = $(this).val();
         $.ajax({

@@ -6,18 +6,19 @@
 <form method="post">
     <div class="form-group">
         <label for="Web Class">Web Class</label>
-        <select id="web_class" name="web_class" class="form-control form-select form-select-lg mb-3">
+
+        <select id="web_class" name="web_class" class="select-2 form-control form-select form-select-lg mb-3">
           {% for web_c in web_classes %} 
-            <option value="{{ web_c.web_cls_num }}"> {{ web_c.web_cls_nm }} </option>
+            <option value="{{ web_c.web_cls_num }}"> {{ web_c.web_cls_num }} : {{ web_c.web_cls_nm }} </option>
           {% endfor %}
         </select>
     </div>
 
     <div class="form-group">
         <label for="content">Attribute</label>
-        <select id="attr" name="attr" class="form-control form-select form-select-lg mb-3">
+        <select id="attr" name="attr_nm" class="select-2 form-control form-select form-select-lg mb-3">
           {% for attr in attrs %} 
-            <option value="{{ attr.sku_num }}"> {{ attr.attr_nm }} : {{ attr.attr_val }} </option>
+            <option value="{{ attr.attr_nm }}"> {{ attr.attr_nm }}</option>
           {% endfor %}
         </select>
     </div>
