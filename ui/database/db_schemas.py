@@ -52,13 +52,15 @@ class TrainedModel(db.Model):
 class Review(db.Model):
     __tablename__ = 'match_review'
 
-    id = db.Column('id', db.Integer, primary_key=True)
-    Review = db.Column('Review_ID', db.Integer)
-    date_created = db.Column('Creation_Date', db.DateTime, nullable=False)
-    web_cls_num  = db.Column('WEB_CLASS_NUM', db.Integer)
+    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
+    review_id = db.Column('Review_ID', db.Integer)
+    sku_num = db.Column('SKU_NUM', db.String(50))
+    item_desc = db.Column('ITEM_DESC', db.Text)
     attr_nm  = db.Column('ATTR_NM', db.Text)
     attr_val = db.Column('ATTR_VAL', db.Text)
     attr_val_rev = db.Column('ATTR_VAL_Reviewed', db.Text, default=None)
+    date_created = db.Column('Creation_Date', db.DateTime, nullable=False)
+    web_cls_num  = db.Column('WEB_CLASS_NUM', db.Integer)    
 
     def __repr__(self):
         return f'Review("{self.id}")'

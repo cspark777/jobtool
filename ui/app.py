@@ -1,6 +1,7 @@
-import datetime
+from datetime import datetime
 import sqlite3
 from werkzeug.exceptions import abort
+import pandas as pd
 
 from flask import Flask, render_template, request, url_for, flash, redirect
 from flask import Response
@@ -9,8 +10,8 @@ import sys
 sys.path.append('../')
 
 
-from ui.database.utils import _add_to_database, _create_job_record
-from ui.database.db_schemas import Job, Result, PyramidPool
+from ui.database.utils import _add_to_database, _create_job_record, _create_review_record, _bulk_add_to_database
+from ui.database.db_schemas import Job, Result, PyramidPool, Review
 from ui import create_app
 
 import json
@@ -132,22 +133,49 @@ def retrieve_results():
 
 @app.route('/submit-review', methods=('GET', 'POST'))
 def submit_review():
-    web_class = None
-    if request.method == 'POST':
-        web_class = request.form['web_class']
-        attr = request.form['attr']
-        cur_time = datetime.datetime.today()
+    reviews = []
+    error = ""
 
-    if not web_class:
-        flash('Web Class is required!')
-    else:
+    if request.method == 'POST': 
+       
         #TODO3 : upload a review document
         # and it to the database 
         #create a training job, add it to database
         # and run training
 
-        return redirect(url_for('index'))
-    return render_template('extract.html')
+        file = request.files['file']
+                 
+        col_names = ['Review_ID','SKU_NUM','ITEM_DESC', 'ATTR_NM', 'ATTR_VAL', 'ATTR_VAL_Reviewed' , 'Creation_Date', 'WEB_CLASS_NUM']
+        #try:
+        # Use Pandas to parse the CSV file
+        csvData = pd.read_csv(file,names=col_names, header=0)
+        
+        bulk_reviews = []
+        for i,row in csvData.iterrows():
+            _bulk_add_to_database
+            date_time_obj = datetime.strptime(row["Creation_Date"], '%Y-%m-%d %H:%M:%S')
+            new_review = _create_review_record(row["Review_ID"], row["SKU_NUM"], 
+                            row["ITEM_DESC"], row["ATTR_NM"], row["ATTR_VAL"], 
+                            row["ATTR_VAL_Reviewed"], 
+                            date_time_obj, row["WEB_CLASS_NUM"])
+            
+            bulk_reviews.append(new_review)
+
+            reviews.append({"review_id": row["Review_ID"], 
+                            "sku_num": row["SKU_NUM"], 
+                            "item_desc": row["ITEM_DESC"], 
+                            "attr_nm": row["ATTR_NM"], 
+                            "attr_val": row["ATTR_VAL"], 
+                            "attr_val_rev": row["ATTR_VAL_Reviewed"], 
+                            "create_date": row["Creation_Date"], 
+                            "web_cls_num": row["WEB_CLASS_NUM"]})
+
+        _bulk_add_to_database(bulk_reviews)
+        #except:
+        #    error = "CSV file format error"
+             
+    return render_template('submit_review.html', reviews=reviews, error_msg=error)
+        
 
 @app.route("/export", methods=["GET"])
 def export():
@@ -168,30 +196,5 @@ def export():
         headers={"Content-disposition":
                  "attachment; filename=results.csv"})
 
-
-    # streaming CSV content -- to send over large data
-    '''
-    def generate(rows):
-        data = StringIO()       # In-Memory File
-        w    = csv.writer(data)
-        
-        # CSV File Headers
-        w.writerow(('SKU_NUM','ATTR_NM', 'ATTR_VAL'))
-        yield data.getvalue()
-        data.seek(0)     # reset pointer
-        data.truncate(0) # reset StringIO size
-        for row in rows:
-            w.writerow(row)
-            yield data.getvalue()
-            data.seek(0)
-            data.truncate(0)
-    
-    rows = (x for x in retrieve_data())   
-    # stream the response as the data is generated
-    response = Response(generate(rows), mimetype='text/csv')
-    # add a filename
-    response.headers.set("Content-Disposition", "attachment", filename=f"{results_filename}.csv")
-    return render_template('export.html', response = response)
-    '''
 
 app.run(debug = False, host="0.0.0.0", port="8080", use_reloader=False,)

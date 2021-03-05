@@ -5,7 +5,7 @@ import pandas as pd
 from flask import current_app         # retrieves current app
 
 from ui import db
-from ui.database.db_schemas import Job
+from ui.database.db_schemas import Job, Review, Result
 
 
 def _create_job_record(web_class, attr, cur_time):
@@ -25,8 +25,24 @@ def _create_result_record(web_class,
                     job_id = job_id, 
                     date_created=cur_time)
 
+def _create_review_record(review_id, 
+                          sku_num, item_desc, attr_nm, attr_val, attr_val_rev,
+                          date_created, web_cls_num):
+    return Review(review_id=review_id,
+                    sku_num=sku_num,
+                    item_desc=item_desc,
+                    attr_nm=attr_nm,
+                    attr_val=attr_val,
+                    attr_val_rev=attr_val_rev,
+                    date_created=date_created,
+                    web_cls_num=web_cls_num)
+
 def _add_to_database(item):
     db.session.add(item)
+    db.session.commit()
+
+def _bulk_add_to_database(items):
+    db.session.bulk_save_objects(items)
     db.session.commit()
 
 def _delete_from_database(item):

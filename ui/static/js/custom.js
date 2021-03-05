@@ -56,4 +56,9 @@
         });
     });
 
+
+    var review_table = $('#review_table').DataTable({        
+        
+    });
+
 })(jQuery); // End of use strict
