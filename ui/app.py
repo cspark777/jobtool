@@ -146,33 +146,33 @@ def submit_review():
         file = request.files['file']
                  
         col_names = ['Review_ID','SKU_NUM','ITEM_DESC', 'ATTR_NM', 'ATTR_VAL', 'ATTR_VAL_Reviewed' , 'Creation_Date', 'WEB_CLASS_NUM']
-        #try:
-        # Use Pandas to parse the CSV file
-        csvData = pd.read_csv(file,names=col_names, header=0)
-        
-        bulk_reviews = []
-        for i,row in csvData.iterrows():
-            _bulk_add_to_database
-            date_time_obj = datetime.strptime(row["Creation_Date"], '%Y-%m-%d %H:%M:%S')
-            new_review = _create_review_record(row["Review_ID"], row["SKU_NUM"], 
-                            row["ITEM_DESC"], row["ATTR_NM"], row["ATTR_VAL"], 
-                            row["ATTR_VAL_Reviewed"], 
-                            date_time_obj, row["WEB_CLASS_NUM"])
+        try:
+            # Use Pandas to parse the CSV file
+            csvData = pd.read_csv(file,names=col_names, header=0)
             
-            bulk_reviews.append(new_review)
+            bulk_reviews = []
+            for i,row in csvData.iterrows():
+                _bulk_add_to_database
+                date_time_obj = datetime.strptime(row["Creation_Date"], '%Y-%m-%d %H:%M:%S')
+                new_review = _create_review_record(row["Review_ID"], row["SKU_NUM"], 
+                                row["ITEM_DESC"], row["ATTR_NM"], row["ATTR_VAL"], 
+                                row["ATTR_VAL_Reviewed"], 
+                                date_time_obj, row["WEB_CLASS_NUM"])
 
-            reviews.append({"review_id": row["Review_ID"], 
-                            "sku_num": row["SKU_NUM"], 
-                            "item_desc": row["ITEM_DESC"], 
-                            "attr_nm": row["ATTR_NM"], 
-                            "attr_val": row["ATTR_VAL"], 
-                            "attr_val_rev": row["ATTR_VAL_Reviewed"], 
-                            "create_date": row["Creation_Date"], 
-                            "web_cls_num": row["WEB_CLASS_NUM"]})
+                bulk_reviews.append(new_review)
 
-        _bulk_add_to_database(bulk_reviews)
-        #except:
-        #    error = "CSV file format error"
+                reviews.append({"review_id": row["Review_ID"], 
+                                "sku_num": row["SKU_NUM"], 
+                                "item_desc": row["ITEM_DESC"], 
+                                "attr_nm": row["ATTR_NM"], 
+                                "attr_val": row["ATTR_VAL"], 
+                                "attr_val_rev": row["ATTR_VAL_Reviewed"], 
+                                "create_date": row["Creation_Date"], 
+                                "web_cls_num": row["WEB_CLASS_NUM"]})
+
+            _bulk_add_to_database(bulk_reviews)
+        except:
+            error = "CSV file format error"
              
     return render_template('submit_review.html', reviews=reviews, error_msg=error)
         
