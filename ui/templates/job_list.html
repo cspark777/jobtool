@@ -10,6 +10,7 @@
       <th>Web Class</th>
       <th>Attribute</th>
       <th>CreateDate</th>
+      <th>Job Status</th>
     </tr>
   </thead>
   <tbody>
@@ -19,6 +20,11 @@
       <td>{{ job.web_cls_num }}</td>
       <td>{{ job.attr_nm }}</td>
       <td>{{ job.date_created }}</td>
+      <td>{% if job.status==0: %} Incompleted 
+          {% else: %} Completed 
+          {% endif %}          
+      </td>
+
     </tr>
     {% endfor %}
   </tbody>

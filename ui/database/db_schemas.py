@@ -8,11 +8,12 @@ class Job(db.Model):
     date_created = db.Column('Creation_Date', db.DateTime, nullable=False)
     web_cls_num  = db.Column('WEB_CLASS_NUM', db.Integer)
     attr_nm  = db.Column('ATTR_NM', db.Text)
+    status = db.Column('status', db.Integer)
     #results_filename  = db.Column('Results_Filename', db.String(128), nullable=False)
     #results_notes     = db.Column('Results_Notes', db.String(256), default=None)
     #status = db.Column('Status', db.String(32), nullable=False, default='Incomplete')
-    results = db.relationship('Result', backref='extract_job', lazy='dynamic')
-    models = db.relationship('TrainedModel', backref='extract_job', lazy='dynamic')
+    #results = db.relationship('Result', backref='extract_job', lazy='dynamic')
+    #models = db.relationship('TrainedModel', backref='extract_job', lazy='dynamic')
     
     def __repr__(self):
         return f'Job("{self.id}")'
@@ -52,8 +53,7 @@ class TrainedModel(db.Model):
 class Review(db.Model):
     __tablename__ = 'match_review'
 
-    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
-    review_id = db.Column('Review_ID', db.Integer)
+    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)    
     sku_num = db.Column('SKU_NUM', db.String(50))
     item_desc = db.Column('ITEM_DESC', db.Text)
     attr_nm  = db.Column('ATTR_NM', db.Text)

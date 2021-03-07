@@ -1,7 +1,25 @@
 (function($) {
     "use strict"; // Start of use strict
 
+    function matchStart(params, data) {
+        params.term = params.term || '';
+        if(params.term == ''){
+            return data;    
+        } 
+
+        if (data.text.toUpperCase().indexOf(params.term.toUpperCase()) == 0) {
+            return data;
+        }
+        return false;
+    }
+
     $('.select-2').select2();
+
+    $(".select-2-matchstart").select2({
+        matcher: function(params, data) {
+            return matchStart(params, data);
+        },
+    });
     
     var job_table = $('#job_table').DataTable({        
         "order": [[ 0, "desc" ]]

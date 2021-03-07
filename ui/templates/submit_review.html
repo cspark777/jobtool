@@ -13,7 +13,9 @@
       <p><input type="submit" value="Submit"></p>
     </form>
   {% else: %}
-    <h5 style="color: green;">Uploaded success, Here is uploaded result:</h5>
+    <h5 style="color: green;">Uploaded success, {{ submit_count }} reviews are uploaded:
+      <p>Here is total list</p>
+    </h5>
     <table id="review_table">
       <thead>
         <tr>
@@ -30,7 +32,7 @@
       <tbody>
         {% for review in reviews %} 
         <tr>
-          <td>{{ review["review_id"] }}</td>
+          <td>{{ review["id"] }}</td>
           <td>{{ review["sku_num"] }}</td>
           <td>{{ review["item_desc"] }}</td>
           <td>{{ review["attr_nm"] }}</td>

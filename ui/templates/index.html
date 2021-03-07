@@ -1,22 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>{% block title %}  Extractor Results  {% endblock %}</h1>
+    <h1>{% block title %}  Dashboard  {% endblock %}</h1>
 
-    {% for job in jobs %}
-    <ul id="job.Job_ID">
-      <li>
-        <span class="field-name">Created:</span>
-        <span class="field-value">{{ job.date_created }}</span>
-      </li>
-      <li>
-        <span class="field-name">Web Class:</span>
-        <span class="field-value">{{ job.web_cls_num }}</span>
-      </li>
-      <li>
-        <span class="field-name">Attribute Name:</span>
-        <span class="field-value">{{ job.attr_nm }}</span>
-      </li>
-    </ul>
-    {% endfor %}
 {% endblock %}

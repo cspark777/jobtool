@@ -25,10 +25,10 @@ def _create_result_record(web_class,
                     job_id = job_id, 
                     date_created=cur_time)
 
-def _create_review_record(review_id, 
+def _create_review_record( 
                           sku_num, item_desc, attr_nm, attr_val, attr_val_rev,
                           date_created, web_cls_num):
-    return Review(review_id=review_id,
+    return Review(
                     sku_num=sku_num,
                     item_desc=item_desc,
                     attr_nm=attr_nm,

@@ -35,9 +35,8 @@ import json
 app = create_app()
 
 @app.route('/')
-def index():
-    print(Job.query.all())
-    return render_template('index.html', jobs=Job.query.all())
+def index():    
+    return render_template('index.html')
 
 @app.route('/get_attrs', methods=["GET"])
 def get_attrs():
@@ -46,7 +45,7 @@ def get_attrs():
 
     res = []
     for attr in attrs:
-        data = {"attr_name": attr.attr_nm}
+        data = {"attr_name": attr.attr_nm.strip()}
         res.append(data)
 
     res_json = json.dumps(res)
@@ -58,7 +57,7 @@ def job_list():
     
     result = []
     for job in jobs:
-        job.date_created = job.date_created.strftime("%Y-%m-%d %H:%M:%S")
+        job.date_created = job.date_created.strftime("%Y-%m-%d %H:%M:%S")        
 
         result.append(job)
     return render_template('job_list.html', jobs=result)
@@ -80,7 +79,7 @@ def extract():
 
         attrs = PyramidPool.query.with_entities(PyramidPool.attr_nm).distinct().filter(PyramidPool.web_cls_num==web_class).filter(PyramidPool.attr_nm==attr_nm).all()
 
-        cur_time = datetime.datetime.today()
+        cur_time = datetime.today()
 
         job_record = _create_job_record(web_class, attrs[0].attr_nm, cur_time)
         _add_to_database(job_record)
@@ -101,8 +100,8 @@ def get_result_attrs():
     return res_json
 
 
-@app.route('/extract-results', methods=('GET', 'POST'))
-def retrieve_results():
+@app.route('/extract_results', methods=('GET', 'POST'))
+def extract_results():
     
     web_classes = Result.query.with_entities(Result.web_cls_num, PyramidPool.web_cls_nm).join(PyramidPool, PyramidPool.web_cls_num==Result.web_cls_num).distinct().all()
 
@@ -130,11 +129,11 @@ def retrieve_results():
         download_url = "/export?class={}&attr_nm={}".format(web_class, attr_nm)
         return render_template('result_list.html', web_classes=web_classes, attrs=attrs, download_url=download_url, results=response_results)   
 
-
-@app.route('/submit-review', methods=('GET', 'POST'))
+@app.route('/submit_review', methods=('GET', 'POST'))
 def submit_review():
-    reviews = []
+    reviews_arr = []
     error = ""
+    submit_count = 0
 
     if request.method == 'POST': 
        
@@ -145,36 +144,42 @@ def submit_review():
 
         file = request.files['file']
                  
-        col_names = ['Review_ID','SKU_NUM','ITEM_DESC', 'ATTR_NM', 'ATTR_VAL', 'ATTR_VAL_Reviewed' , 'Creation_Date', 'WEB_CLASS_NUM']
-        try:
-            # Use Pandas to parse the CSV file
-            csvData = pd.read_csv(file,names=col_names, header=0)
+        col_names = ['SKU_NUM','ITEM_DESC', 'ATTR_NM', 'ATTR_VAL', 'ATTR_VAL_Reviewed', 'WEB_CLASS_NUM']
+        #try:
+        # Use Pandas to parse the CSV file
+        csvData = pd.read_csv(file,names=col_names, header=0)
+        
+        bulk_reviews = []
+        new_jobs = []
+        for i,row in csvData.iterrows():
             
-            bulk_reviews = []
-            for i,row in csvData.iterrows():
-                _bulk_add_to_database
-                date_time_obj = datetime.strptime(row["Creation_Date"], '%Y-%m-%d %H:%M:%S')
-                new_review = _create_review_record(row["Review_ID"], row["SKU_NUM"], 
-                                row["ITEM_DESC"], row["ATTR_NM"], row["ATTR_VAL"], 
-                                row["ATTR_VAL_Reviewed"], 
-                                date_time_obj, row["WEB_CLASS_NUM"])
+            date_time_obj = datetime.now()
+            new_review = _create_review_record(row["SKU_NUM"], 
+                            row["ITEM_DESC"], row["ATTR_NM"], row["ATTR_VAL"], 
+                            row["ATTR_VAL_Reviewed"], 
+                            date_time_obj, row["WEB_CLASS_NUM"])
+            bulk_reviews.append(new_review)
 
-                bulk_reviews.append(new_review)
+            new_job = _create_job_record(row["WEB_CLASS_NUM"], row["ATTR_NM"], date_time_obj)
+            new_jobs.append(new_job)
 
-                reviews.append({"review_id": row["Review_ID"], 
-                                "sku_num": row["SKU_NUM"], 
-                                "item_desc": row["ITEM_DESC"], 
-                                "attr_nm": row["ATTR_NM"], 
-                                "attr_val": row["ATTR_VAL"], 
-                                "attr_val_rev": row["ATTR_VAL_Reviewed"], 
-                                "create_date": row["Creation_Date"], 
-                                "web_cls_num": row["WEB_CLASS_NUM"]})
+        submit_count = len(bulk_reviews)
 
-            _bulk_add_to_database(bulk_reviews)
-        except:
-            error = "CSV file format error"
+        _bulk_add_to_database(bulk_reviews)
+        _bulk_add_to_database(new_jobs)
+
+        reviews = Review.query.order_by(Review.date_created.desc()).all()
+    
+        
+        for review in reviews:
+            review.date_created = review.date_created.strftime("%Y-%m-%d %H:%M:%S")
+
+            reviews_arr.append(review)
+        
+        #except:
+        #    error = "CSV file format error"
              
-    return render_template('submit_review.html', reviews=reviews, error_msg=error)
+    return render_template('submit_review.html', reviews=reviews_arr, error_msg=error, submit_count=submit_count)
         
 
 @app.route("/export", methods=["GET"])
