@@ -11,7 +11,8 @@ from ui.database.db_schemas import Job, Review, Result
 def _create_job_record(web_class, attr, cur_time):
     return Job(web_cls_num=web_class, 
                     attr_nm=attr,
-                    date_created=cur_time)
+                    date_created=cur_time,
+                    status=0)
 
 def _create_result_record(web_class, 
                           attr, attr_val, confidence, 
