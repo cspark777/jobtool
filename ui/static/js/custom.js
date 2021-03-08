@@ -79,4 +79,17 @@
         
     });
 
+    var review_csv = document.getElementById('review_csv');
+
+    review_csv.onchange = function(e) {
+      var ext = this.value.match(/\.([^\.]+)$/)[1];
+      switch (ext) {
+        case 'csv':          
+          break;
+        default:
+          alert('Other files are Not allowed, Please select only csv file.');
+          this.value = '';
+      }
+    };
+
 })(jQuery); // End of use strict

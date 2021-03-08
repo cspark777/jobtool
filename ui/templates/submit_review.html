@@ -9,7 +9,7 @@
   {% if reviews|length == 0: %}
     <span>Upload your CSV file</span>
     <form method="POST" action="" enctype="multipart/form-data">
-      <p><input type="file" name="file"></p>
+      <p><input type="file" id="review_csv" name="file" accept=".csv"></p>
       <p><input type="submit" value="Submit"></p>
     </form>
   {% else: %}

@@ -137,47 +137,43 @@ def submit_review():
 
     if request.method == 'POST': 
        
-        #TODO3 : upload a review document
-        # and it to the database 
-        #create a training job, add it to database
-        # and run training
-
-        file = request.files['file']
-                 
-        col_names = ['SKU_NUM','ITEM_DESC', 'ATTR_NM', 'ATTR_VAL', 'ATTR_VAL_Reviewed', 'WEB_CLASS_NUM']
-        #try:
-        # Use Pandas to parse the CSV file
-        csvData = pd.read_csv(file,names=col_names, header=0)
-        
-        bulk_reviews = []
-        new_jobs = []
-        for i,row in csvData.iterrows():
+        try:
+            file = request.files['file']
+                     
+            col_names = ['SKU_NUM','ITEM_DESC', 'ATTR_NM', 'ATTR_VAL', 'ATTR_VAL_Reviewed', 'WEB_CLASS_NUM']
+            #try:
+            # Use Pandas to parse the CSV file
+            csvData = pd.read_csv(file,names=col_names, header=0)
             
-            date_time_obj = datetime.now()
-            new_review = _create_review_record(row["SKU_NUM"], 
-                            row["ITEM_DESC"], row["ATTR_NM"], row["ATTR_VAL"], 
-                            row["ATTR_VAL_Reviewed"], 
-                            date_time_obj, row["WEB_CLASS_NUM"])
-            bulk_reviews.append(new_review)
+            bulk_reviews = []
+            new_jobs = []
+            for i,row in csvData.iterrows():
+                
+                date_time_obj = datetime.now()
+                new_review = _create_review_record(row["SKU_NUM"], 
+                                row["ITEM_DESC"], row["ATTR_NM"], row["ATTR_VAL"], 
+                                row["ATTR_VAL_Reviewed"], 
+                                date_time_obj, row["WEB_CLASS_NUM"])
+                bulk_reviews.append(new_review)
 
-            new_job = _create_job_record(row["WEB_CLASS_NUM"], row["ATTR_NM"], date_time_obj)
-            new_jobs.append(new_job)
+                new_job = _create_job_record(row["WEB_CLASS_NUM"], row["ATTR_NM"], date_time_obj)
+                new_jobs.append(new_job)
 
-        submit_count = len(bulk_reviews)
+            submit_count = len(bulk_reviews)
 
-        _bulk_add_to_database(bulk_reviews)
-        _bulk_add_to_database(new_jobs)
+            _bulk_add_to_database(bulk_reviews)
+            _bulk_add_to_database(new_jobs)
 
-        reviews = Review.query.order_by(Review.date_created.desc()).all()
-    
+            reviews = Review.query.order_by(Review.date_created.desc()).all()
         
-        for review in reviews:
-            review.date_created = review.date_created.strftime("%Y-%m-%d %H:%M:%S")
+            
+            for review in reviews:
+                review.date_created = review.date_created.strftime("%Y-%m-%d %H:%M:%S")
 
-            reviews_arr.append(review)
+                reviews_arr.append(review)
         
-        #except:
-        #    error = "CSV file format error"
+        except:
+            error = "CSV file format error"
              
     return render_template('submit_review.html', reviews=reviews_arr, error_msg=error, submit_count=submit_count)
         
@@ -202,4 +198,4 @@ def export():
                  "attachment; filename=results.csv"})
 
 
-app.run(debug = False, host="0.0.0.0", port="8080", use_reloader=False,)
+app.run(debug = False, host="0.0.0.0", port="9080", use_reloader=False,)
