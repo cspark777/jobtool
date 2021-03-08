@@ -170,8 +170,7 @@ def submit_review():
             for review in reviews:
                 review.date_created = review.date_created.strftime("%Y-%m-%d %H:%M:%S")
 
-                reviews_arr.append(review)
-        
+                reviews_arr.append(review)        
         except:
             error = "CSV file format error"
              
