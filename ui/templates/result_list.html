@@ -44,33 +44,33 @@
     <table id="result_table">
       <thead>
         <tr>
-          <th>Extract_ID</th>
-          <th>SKU_NUM</th>
-          <!--<th>Item_Desc</th>-->
+          <th>ID</th>
+          <th>SKU_NUM</th>          
           <th>ATTR_NM</th>
+          <!--<th>Item_Desc</th>-->
           <th>ATTR_VAL</th>
-          <th>PRED_ATTR_VAL</th>
-          <th>Confidence</th>
-          <th>Creation Date</th>
+          <th>pred_attr_val</th>
+          <th>web_class</th>
+          <th>Confidence</th>          
           <th>Model_Id</th>
-          <th>Job_Id</th>
-          <th>class</th>
+          <th>Job_Id</th>          
+          <th>Creation Date</th>
         </tr>
       </thead>
       <tbody>
         {% for res in results %} 
         <tr>
-          <td>{{ res.extract_id }}</td>
-          <td>{{ res.sku_num }}</td>
-          <!--<td>{{ res.item_desc }}</td>-->
+          <td>{{ res.id }}</td>
+          <td>{{ res.sku_num }}</td>          
           <td>{{ res.attr_nm }}</td>
+          <!--<td>{{ res.item_desc }}</td>-->
           <td>{{ res.attr_val }}</td>
           <td>{{ res.pred_attr_val }}</td>
-          <td>{{ res.confidence }}</td>
-          <td>{{ res.date_created }}</td>
+          <td>{{ res.web_cls_nm }}</td>
+          <td>{{ res.confidence }}</td>          
           <td>{{ res.model_id }}</td>
-          <td>{{ res.job_id }}</td>
-          <td>{{ res.web_cls_num }}</td>
+          <td>{{ res.job_id }}</td>    
+          <td>{{ res.date_created }}</td>      
         </tr>
         {% endfor %}
       </tbody>

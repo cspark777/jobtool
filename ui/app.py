@@ -61,7 +61,7 @@ def job_list():
 
         result.append(job)
     return render_template('job_list.html', jobs=result)
-
+'''
 @app.route('/extract', methods=('GET', 'POST'))
 def extract():
     if request.method == 'GET':
@@ -85,6 +85,7 @@ def extract():
         _add_to_database(job_record)
 
         return redirect(url_for('job_list'))
+'''
 
 @app.route('/get_result_attrs', methods=["GET"])
 def get_result_attrs():
@@ -103,7 +104,7 @@ def get_result_attrs():
 @app.route('/extract_results', methods=('GET', 'POST'))
 def extract_results():
     
-    web_classes = Result.query.with_entities(Result.web_cls_num, PyramidPool.web_cls_nm).join(PyramidPool, PyramidPool.web_cls_num==Result.web_cls_num).distinct().all()
+    web_classes = Result.query.with_entities(Result.web_cls_num, Result.web_cls_nm).distinct().all()
 
     attrs = []
     if len(web_classes) > 0:
@@ -185,10 +186,10 @@ def export():
 
     results = Result.query.filter_by(web_cls_num=web_class, attr_nm=attr_nm)
 
-    csv = "Extract_ID,SKU_NUM,ITEM_DESC,ATTR_NM,ATTR_VAL,PRED_ATTR_VAL,Confidence,Creation_Date,Model_ID,Job_ID,WEB_CLASS_NUM\n"
+    csv = "ID,SKU_NUM,ATTR_NM,ITEM_DESC,ATTR_VAL,PRED_ATTR_VAL,WEB_CLASS_NUM,WEB_CLASS_NM,Confidence,Model_ID,Job_ID,Creation_Date\n"
 
     for res in results:
-        csv = csv + '{},{},\"{}\",\"{}\",\"{}\",\"{}\",{},{},{},{},{}\n'.format(res.extract_id, res.sku_num, res.item_desc, res.attr_nm, res.attr_val, res.pred_attr_val, res.confidence, res.date_created, res.model_id, res.job_id, res.web_cls_num)
+        csv = csv + '{},\"{}\",\"{}\",\"{}\",\"{}\",\"{}\",{},\"{}\",{},{},{},\"{}\"\n'.format(res.id, res.sku_num, res.attr_nm, res.item_desc, res.attr_val, res.pred_attr_val, res.web_cls_num, res.web_cls_nm, res.confidence, res.model_id, res.job_id, res.date_created)
 
     return Response(
         csv,

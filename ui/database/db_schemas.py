@@ -20,8 +20,7 @@ class Job(db.Model):
     
 class Result(db.Model):
     __tablename__ = 'extract_result'
-    id = db.Column('id', db.Integer, primary_key=True)
-    extract_id = db.Column('Extract_ID', db.Integer, nullable=False)
+    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)    
     sku_num = db.Column('SKU_NUM', db.Text, nullable=False)
     item_desc = db.Column('ITEM_DESC', db.Text)
     attr_nm = db.Column('ATTR_NM', db.Text)
@@ -32,6 +31,7 @@ class Result(db.Model):
     model_id = db.Column('Model_ID', db.Integer, db.ForeignKey('trained_model.Model_ID'), nullable=False)
     job_id = db.Column('Job_ID', db.Integer, db.ForeignKey('extract_job.Job_ID'), nullable=False)    
     web_cls_num  = db.Column('WEB_CLASS_NUM', db.Integer, db.ForeignKey('PyramidPool.web_cls_num'))
+    web_cls_nm = db.Column('WEB_CLASS_NM', db.Text)
         
     def __repr__(self):
         return f'Result("{self.id}")'
