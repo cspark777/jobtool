@@ -10,7 +10,7 @@ import sys
 sys.path.append('../')
 
 
-from ui.database.utils import _add_to_database, _create_job_record, _create_review_record, _bulk_add_to_database
+from ui.database.utils import _add_to_database, _create_job_record, _create_review_record, _bulk_add_to_database, _update_database
 from ui.database.db_schemas import Job, Result, PyramidPool, Review
 from ui import create_app
 
@@ -129,7 +129,7 @@ def extract_results():
 
         download_url = "/export?class={}&attr_nm={}".format(web_class, attr_nm)
         return render_template('result_list.html', web_classes=web_classes, attrs=attrs, download_url=download_url, results=response_results)   
-
+'''
 @app.route('/submit_review', methods=('GET', 'POST'))
 def submit_review():
     reviews_arr = []
@@ -176,7 +176,45 @@ def submit_review():
             error = "CSV file format error"
              
     return render_template('submit_review.html', reviews=reviews_arr, error_msg=error, submit_count=submit_count)
-        
+''' 
+@app.route('/submit_review', methods=('GET', 'POST'))
+def submit_review():
+    reviews_arr = []
+    error = ""
+
+    try:       
+        reviews = Review.query.order_by(Review.date_created.desc()).all()
+    
+        for review in reviews:
+            review.date_created = review.date_created.strftime("%Y-%m-%d %H:%M:%S")
+
+            reviews_arr.append(review)        
+    except:
+            error = "get review data error"
+             
+    return render_template('submit_review.html', reviews=reviews_arr, error_msg=error)
+
+@app.route('/update_attr_rev', methods=["POST"])
+def update_attr_rev():
+    pk = request.form['pk']
+    attr_val_rev = request.form['value']
+
+    print("-------------------")
+    print(pk, attr_val_rev)
+
+    review = Review.query.filter_by(id=int(pk)).first()
+
+    if review is None:
+        return Response("error")
+
+    print(review)
+
+    review.attr_val_rev = attr_val_rev
+    _update_database()
+
+    return Response("success")
+
+
 
 @app.route("/export", methods=["GET"])
 def export():

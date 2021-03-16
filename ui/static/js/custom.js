@@ -20,7 +20,7 @@
             return matchStart(params, data);
         },
     });
-    
+    //============================================================
     var job_table = $('#job_table').DataTable({        
         "order": [[ 0, "desc" ]]
     });
@@ -47,7 +47,7 @@
         });
     });
 
-
+    //=========================================================
     var result_table = $('#result_table').DataTable({        
         "order": [[ 7, "desc" ]]
     });
@@ -74,11 +74,30 @@
         });
     });
 
-
+    //=============================================================
     var review_table = $('#review_table').DataTable({        
-        
+        "fnDrawCallback": function () {
+            if(this.DataTable().data().length>0){
+                $('#review_table>tbody>tr>td:nth-child(6)').editable({
+                    url: '/update_attr_rev',
+                    type: 'text', 
+                    mode: 'inline',
+                    showbuttons: false,
+                    pk: function(e){
+                        return $(this.parentElement).find("td:nth-child(1)").text()
+                    },
+                    success: function(response, newValue) {                        
+                        if(response=="error") {
+                            alert("update is failed")
+                        }
+                    }        
+                });    
+            }            
+        }   
     });
 
+
+    /*
     var review_csv = document.getElementById('review_csv');
 
     review_csv.onchange = function(e) {
@@ -91,5 +110,6 @@
           this.value = '';
       }
     };
+    */
 
 })(jQuery); // End of use strict

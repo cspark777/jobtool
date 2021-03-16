@@ -49,3 +49,6 @@ def _bulk_add_to_database(items):
 def _delete_from_database(item):
     db.session.delete(item)
     db.session.commit()
+
+def _update_database():
+    db.session.commit()
