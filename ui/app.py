@@ -194,6 +194,33 @@ def submit_review():
              
     return render_template('submit_review.html', reviews=reviews_arr, error_msg=error)
 
+@app.route('/submit_review2', methods=('GET', 'POST'))
+def submit_review2():
+    reviews_arr = []
+    error = ""
+    attr_vals_json = ""
+    attr_vals_arr = []
+    #try:       
+    attr_vals = Review.query.with_entities(Review.attr_val).distinct().all()
+    _id = 0;
+    for val in attr_vals:
+        _id = _id + 1
+        attr_vals_arr.append({"value":val.attr_val, "id": _id, "text": val.attr_val} )
+    attr_vals_json = json.dumps(attr_vals_arr)
+
+    reviews = Review.query.order_by(Review.date_created.desc()).all()
+
+    for review in reviews:
+        review.date_created = review.date_created.strftime("%Y-%m-%d %H:%M:%S")
+        reviews_arr.append(review)    
+        
+    
+    
+    #except:
+    #        error = "get review data error"
+             
+    return render_template('submit_review2.html', reviews=reviews_arr, attr_vals_json=attr_vals_json, error_msg=error)
+
 @app.route('/update_attr_rev', methods=["POST"])
 def update_attr_rev():
     pk = request.form['pk']

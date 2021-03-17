@@ -96,6 +96,33 @@
         }   
     });
 
+    //============================================================
+    var attr_vals_json = $("#attr_vals_json").val();
+    var attr_vals = JSON.parse(attr_vals_json);
+    var review_table2 = $('#review_table2').DataTable({        
+        "fnDrawCallback": function () {
+            if(this.DataTable().data().length>0){
+                $('#review_table2>tbody>tr>td:nth-child(6)').editable({
+                    url: '/update_attr_rev',
+                    type: 'select', 
+                    mode: 'inline',
+                    showbuttons: false,
+                    value:function(e){
+                        return $(this.closest("tr")).find("td:nth-child(6)").text()
+                    },
+                    pk: function(e){
+                        return $(this.closest("tr")).find("td:nth-child(1)").text()
+                    },
+                    success: function(response, newValue) {                        
+                        if(response=="error") {
+                            alert("update is failed")
+                        }
+                    },
+                    source: attr_vals        
+                });    
+            }            
+        }   
+    });
 
     /*
     var review_csv = document.getElementById('review_csv');

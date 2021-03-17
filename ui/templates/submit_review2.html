@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Submit Review  {% endblock %}</h1>
+
+{% if error_msg != "": %}
+  <div style="color: red;"> <h3> {{ error_msg }} </h3> </div>
+{% else: %}
+  {% if reviews|length == 0: %}
+    <span>Upload your CSV file</span>
+    <form method="POST" action="" enctype="multipart/form-data">
+      <p><input type="file" id="review_csv" name="file" accept=".csv"></p>
+      <p><input type="submit" value="Submit"></p>
+    </form>
+  {% else: %}
+    <input type="hidden" id="attr_vals_json" value="{{ attr_vals_json }}">
+    <table id="review_table2">
+      <thead>
+        <tr>
+          <th>Review_ID</th>
+          <th>SKU_NUM</th>
+          <th>ITEM_DESC</th>
+          <th>ATTR_NM</th>
+          <th>ATTR_VAL</th>
+          <th>ATTR_VAL_Rev</th>
+          <th>Creation_Date</th>
+          <th>web_cls_num</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for review in reviews %} 
+        <tr>
+          <td>{{ review["id"] }}</td>
+          <td>{{ review["sku_num"] }}</td>
+          <td>{{ review["item_desc"] }}</td>
+          <td>{{ review["attr_nm"] }}</td>
+          <td>{{ review["attr_val"] }}</td>
+          <td>{{ review["attr_val_rev"] }}</td>
+          <td>{{ review["create_date"] }}</td>
+          <td>{{ review["web_cls_num"] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}  
+{% endif %}
+
+{% endblock %}
